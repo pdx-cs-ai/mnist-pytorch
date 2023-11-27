@@ -8,5 +8,5 @@ on the MNIST Handwritten Digit dataset using a convolutional
 neural net.
 
 My modifications include moving the data to CUDA if
-available, reducing the error output, and arranging to save
-the model.
+available, reducing the error output, arranging to save the
+model, and moving the parameters to be program arguments.

@@ -1,4 +1,5 @@
 # https://nextjournal.com/gkoehler/pytorch-mnist
+import argparse
 
 import torch
 import torchvision
@@ -6,12 +7,14 @@ import torch.nn as nn
 import torch.nn.functional as func
 import torch.optim as optim
 
-n_epochs = 3
-batch_size_train = 64
-batch_size_test = 1000
-learning_rate = 0.01
-momentum = 0.5
-log_interval = 10
+ap = argparse.ArgumentParser()
+ap.add_argument("-e", "--epochs", type=int, default=3)
+ap.add_argument("--ntr", "--nbatch-training", type=int, default=64)
+ap.add_argument("--nte", "--nbatch-test", type=int, default=1000)
+ap.add_argument("-l", "--learning-rate", type=float, default=0.01)
+ap.add_argument("-m", "--momentum", type=float, default=0.5)
+ap.add_argument("-s", "--save_file")
+args = ap.parse_args()
 
 # Turn on for determinism.
 # random_seed = 1
@@ -40,8 +43,8 @@ def make_loader(train, batch_size):
         shuffle=train,
     )
 
-train_loader = make_loader(True, batch_size_train)
-test_loader = make_loader(False, batch_size_test)
+train_loader = make_loader(True, args.ntr)
+test_loader = make_loader(False, args.nte)
 
 class Net(nn.Module):
     def __init__(self):
@@ -65,8 +68,8 @@ network = Net()
 network.to(device)
 optimizer = optim.SGD(
     network.parameters(),
-    lr=learning_rate,
-    momentum=momentum,
+    lr=args.learning_rate,
+    momentum=args.momentum,
 )
 
 def train(epoch):
@@ -106,13 +109,20 @@ def test():
         100. * correct / len(test_loader.dataset),
     ))
 
-try:
-    network.load_state_dict(torch.load('./mnist.model'))
+def run_training():
     test()
-except:
-    test()
-    for epoch in range(1, n_epochs + 1):
+    for epoch in range(1, args.epochs + 1):
         train(epoch)
         test()
+    if args.save_file:
+        torch.save(network.state_dict(), args.save_file)
 
-torch.save(network.state_dict(), './mnist.model')
+if args.save_file:
+    try:
+        network.load_state_dict(torch.load(args.save_file))
+        test()
+    except:
+        run_training()
+else:
+    run_training()
+
