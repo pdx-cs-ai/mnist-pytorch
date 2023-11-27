@@ -73,6 +73,7 @@ optimizer = optim.SGD(
 )
 
 def train(epoch):
+    print('Train Epoch', epoch)
     network.train()
     for batch_idx, (data, target) in enumerate(train_loader):
         data = data.to(device)
@@ -82,10 +83,6 @@ def train(epoch):
         loss = func.nll_loss(output, target)
         loss.backward()
         optimizer.step()
-    print('Train Epoch: {} Loss: {:.6f}'.format(
-        epoch,
-        loss.item(),
-    ))
     #torch.save(network.state_dict(), './results/model.pth')
     #torch.save(optimizer.state_dict(), './results/optimizer.pth')
 
